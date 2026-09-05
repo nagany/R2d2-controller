@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -35,14 +36,11 @@
       padding: 20px;
       gap: 20px;
     }
-    /* =========================
-       LEFT / DRIVE PANEL
-       ========================= */
+    /* DRIVE PANEL */
     #left {
       flex: 1;
       min-width: 360px;
-      background:
-        linear-gradient(145deg, #d9dde0, #8c9499);
+      background: linear-gradient(145deg, #d9dde0, #8c9499);
       border-radius: 28px;
       padding: 18px;
       box-shadow:
@@ -103,7 +101,7 @@
     #status.connected {
       color: #62e0ff;
     }
-    /* Joystick area */
+    /* JOYSTICK */
     #joystickArea {
       position: absolute;
       left: 50%;
@@ -141,8 +139,7 @@
       top: 64px;
     }
     #stick1 img {
-      filter:
-        drop-shadow(0 5px 5px rgba(0,0,0,.5));
+      filter: drop-shadow(0 5px 5px rgba(0,0,0,.5));
     }
     .joystickLabel {
       position: absolute;
@@ -173,14 +170,11 @@
         inset 0 1px 1px rgba(255,255,255,.35),
         0 4px 10px rgba(0,0,0,.35);
     }
-    /* =========================
-       RIGHT / SOUND PANEL
-       ========================= */
+    /* SOUND PANEL */
     #right {
       flex: 1.15;
       min-width: 390px;
-      background:
-        linear-gradient(145deg, #1d2932, #0c1217);
+      background: linear-gradient(145deg, #1d2932, #0c1217);
       border-radius: 28px;
       padding: 22px;
       box-shadow:
@@ -203,6 +197,7 @@
       font-size: 9px;
       color: #6f818d;
       letter-spacing: 2px;
+      margin-top: 4px;
     }
     #buttonsDiv {
       display: grid;
@@ -216,8 +211,7 @@
       min-height: 70px;
       border: 1px solid #3b4a54;
       border-radius: 14px;
-      background:
-        linear-gradient(145deg, #293741, #151e24);
+      background: linear-gradient(145deg, #293741, #151e24);
       color: #dfe7eb;
       display: flex;
       flex-direction: column;
@@ -234,8 +228,7 @@
     }
     .soundButton:active {
       transform: scale(.94);
-      background:
-        linear-gradient(145deg, #126b96, #0b405a);
+      background: linear-gradient(145deg, #126b96, #0b405a);
       border-color: #55bde8;
     }
     .soundIcon {
@@ -266,18 +259,72 @@
       }
     }
   </style>
+</head>
+<body>
+<div id="controls">
+  <div id="left">
+<div class="panelTitle">
+  R2-D2 // DRIVE CONTROL
+</div>
+<div id="connectionPanel">
+  <button id="connectButton" onclick="connect()">
+    CONNECT
+  </button>
+  <div id="status">
+    ○ DISCONNECTED
+  </div>
+</div>
+<div id="joystickArea">
+  <div id="joystick">
+    <img src="images/joystick-base.png" height="256px">
+    <div id="stick1">
+      <img src="images/joystick-red.png" height="128px">
+    </div>
+  </div>
+  <div class="joystickLabel">
+    TOUCH TO DRIVE
+  </div>
+</div>
+<button id="stopButton" onclick="stop()">
+  ⛔ STOP
+</button>
+  </div>
+  <div id="right">
+<div class="soundHeader">
+  <div>
+    <div class="soundTitle">
+      🤖 R2-D2 SOUNDS
+    </div>
+    <div class="soundSubtitle">
+      ASTROMECH COMMUNICATION SYSTEM
+    </div>
+  </div>
+  <div style="font-size:25px;">
+    📡
+  </div>
+</div>
+<div id="buttonsDiv"></div>
+  </div>
+</div>
 <script>
+/* =========================
+   BLUETOOTH
+   ========================= */
 var characteristic;
 function connect() {
-  let response = navigator.bluetooth.requestDevice({
+  navigator.bluetooth.requestDevice({
     filters: [{"name":"w32 ControlHub"}],
-    optionalServices: ['d9d9e9e0-aa4e-4797-8151-cb41cedaf2ad']
+    optionalServices: [
+      'd9d9e9e0-aa4e-4797-8151-cb41cedaf2ad'
+    ]
   })
   .then(device => {
     return device.gatt.connect();
   })
   .then(server => {
-    return server.getPrimaryService('d9d9e9e0-aa4e-4797-8151-cb41cedaf2ad');
+    return server.getPrimaryService(
+      'd9d9e9e0-aa4e-4797-8151-cb41cedaf2ad'
+    );
   })
   .then(async service => {
     characteristic = await service.getCharacteristic(
@@ -288,7 +335,8 @@ function connect() {
     console.log('Connected!');
     document.getElementById("status").innerHTML =
       "● CONNECTED";
-    document.getElementById("status").classList.add("connected");
+    document.getElementById("status")
+      .classList.add("connected");
     stop();
   })
   .catch(error => {
@@ -302,27 +350,34 @@ async function writeToChar(value) {
   value = new Uint8Array(value).buffer;
   if (characteristic) {
     characteristic.writeValue(value)
-    .catch(e => {});
+      .catch(e => {});
   }
 }
 async function play(sound) {
   try {
     writeToChar(sound);
-  } catch(error) {
+  }
+  catch(error) {
     console.log('Argh! ' + error);
   }
 }
 async function drive(index) {
   try {
-    return await writeToChar(driveValues[index]);
-  } catch(error) {
+    return await writeToChar(
+      driveValues[index]
+    );
+  }
+  catch(error) {
     console.log('Argh! ' + error);
   }
 }
 async function turn(index) {
   try {
-    return await writeToChar(turnValues[index]);
-  } catch(error) {
+    return await writeToChar(
+      turnValues[index]
+    );
+  }
+  catch(error) {
     console.log('Argh! ' + error);
   }
 }
@@ -330,13 +385,27 @@ async function stop() {
   try {
     y = 31;
     driveAndTurn();
-  } catch(error) {
+  }
+  catch(error) {
     console.log('Argh! ' + error);
   }
 }
+/* =========================
+   UTILS
+   ========================= */
 function hexToBytes(hex) {
-  for (var bytes = [], c = 0; c < hex.length; c += 2)
-    bytes.push(parseInt(hex.substr(c, 2), 16));
+  for (
+    var bytes = [],
+    c = 0;
+    c < hex.length;
+    c += 2
+  )
+    bytes.push(
+      parseInt(
+        hex.substr(c, 2),
+        16
+      )
+    );
   return bytes;
 }
 /* =========================
@@ -388,7 +457,6 @@ let driveValues = [
 "14020259B0B1",
 "14020255713D",
 "140202502198",
-"1402024B82C2",
 "14020249A280",
 "14020245630C",
 "140202412388",
@@ -408,191 +476,8 @@ let driveValues = [
 "140202070B8A"
 ];
 /* =========================
-   JOYSTICK
+   TURN VALUES
    ========================= */
-class JoystickController {
-  constructor(stickID, maxDistance, deadzone) {
-    this.id = stickID;
-    let stick = document.getElementById(stickID);
-    this.dragStart = null;
-    this.touchId = null;
-    this.active = false;
-    this.value = { x: 0, y: 0 };
-    let self = this;
-    function handleDown(event) {
-      self.active = true;
-      stick.style.transition = '0s';
-      event.preventDefault();
-      if (event.changedTouches)
-        self.dragStart = {
-          x: event.changedTouches[0].clientX,
-          y: event.changedTouches[0].clientY
-        };
-      else
-        self.dragStart = {
-          x: event.clientX,
-          y: event.clientY
-        };
-      if (event.changedTouches)
-        self.touchId = event.changedTouches[0].identifier;
-    }
-    function handleMove(event) {
-      if (!self.active) return;
-      if (!characteristic) return;
-      let touchmoveId = null;
-      if (event.changedTouches) {
-        for (let i = 0; i < event.changedTouches.length; i++) {
-          if (self.touchId == event.changedTouches[i].identifier) {
-            touchmoveId = i;
-            event.clientX = event.changedTouches[i].clientX;
-            event.clientY = event.changedTouches[i].clientY;
-          }
-        }
-        if (touchmoveId == null) return;
-      }
-      const xDiff = event.clientX - self.dragStart.x;
-      const yDiff = event.clientY - self.dragStart.y;
-      const angle = Math.atan2(yDiff, xDiff);
-      const driveangle = Math.atan2(xDiff, -yDiff);
-      const distance =
-        Math.min(maxDistance, Math.hypot(xDiff, yDiff));
-      const xPosition = distance * Math.cos(angle);
-      const yPosition = distance * Math.sin(angle);
-      stick.style.transform =
-        `translate3d(${xPosition}px, ${yPosition}px, 0px)`;
-      const distance2 =
-        (distance < deadzone)
-        ? 0
-        : maxDistance / (maxDistance - deadzone)
-          * (distance - deadzone);
-      const xPosition2 =
-        distance2 * Math.cos(angle);
-      const yPosition2 =
-        distance2 * Math.sin(angle);
-      const xPercent =
-        parseFloat((xPosition2 / maxDistance).toFixed(4));
-      const yPercent =
-        parseFloat((yPosition2 / maxDistance).toFixed(4));
-      self.value = {
-        x: xPercent,
-        y: yPercent
-      };
-      let xVal;
-      let yVal;
-      let limit = .75 * Math.PI;
-      if (Math.abs(driveangle) < limit) {
-        xVal =
-          ((33 - 2) *
-          (driveangle + limit)) /
-          (2 * limit) + 2;
-        yVal =
-          ((0 - 31) * distance) /
-          64 + 31;
-      } else {
-        xVal = 17;
-        yVal =
-          ((62 - 31) * distance) /
-          64 + 31;
-      }
-      x = Math.floor(xVal);
-      y = Math.floor(yVal);
-      throttle(() => driveAndTurn());
-    }
-    function handleUp(event) {
-      if (!self.active) return;
-      if (
-        event.changedTouches &&
-        self.touchId != event.changedTouches[0].identifier
-      )
-        return;
-      stick.style.transition = '.2s';
-      stick.style.transform =
-        `translate3d(0px, 0px, 0px)`;
-      self.value = {
-        x: 0,
-        y: 0
-      };
-      self.touchId = null;
-      self.active = false;
-      stop();
-    }
-    stick.addEventListener('mousedown', handleDown);
-    stick.addEventListener('touchstart', handleDown);
-    document.addEventListener(
-      'mousemove',
-      handleMove,
-      {passive: true}
-    );
-    document.addEventListener(
-      'touchmove',
-      handleMove,
-      {passive: true}
-    );
-    document.addEventListener(
-      'mouseup',
-      handleUp
-    );
-    document.addEventListener(
-      'touchend',
-      handleUp
-    );
-  }
-}
-/* =========================
-   DRIVE / TURN
-   ========================= */
-function driveAndTurn() {
-  if (x) turn(x);
-  setTimeout(() => drive(y), 100);
-}
-/* =========================
-   SOUNDS
-   ========================= */
-let sounds = {
-  "grump"       : ["😠","1E011B42AA"],
-  "scold"       : ["😤","1E011A528B"],
-  "chitter"     : ["🗯️","1E011962E8"],
-  "chattering"  : ["💬","1E011872C9"],
-  "i love you"  : ["❤️","1E01178326"],
-  "bleep"       : ["🔊","1E01169307"],
-  "beep"        : ["📢","1E0115A364"],
-  "whistle"     : ["🎵","1E0114B345"],
-  "descending"  : ["📉","1E0113C3A2"],
-  "excited"     : ["🤩","1E0112D383"],
-  "cheery"      : ["😊","1E0111E3E0"],
-  "sad"         : ["😢","1E0110F3C1"],
-  "scream!!"    : ["😱","1E010F101F"],
-  "startup"     : ["🚀","1E010E003E"],
-  "surprise!!"  : ["😲","1E010C207C"],
-  "story"       : ["📖","1E010A40BA"],
-  "wow!"        : ["✨","1E010860F8"],
-  "thbt"        : ["😛","1E01068136"],
-  "worried"     : ["😟","1E0104A174"],
-  "thinking"    : ["🤔","1E0100E1F0"]
-};
-function makeSoundButtons() {
-  let soundsDiv =
-    document.getElementById('buttonsDiv');
-  for (
-    let [key, value] of Object.entries(sounds)
-  ) {
-    soundsDiv.innerHTML +=
-      `<button class="soundButton"
-       onclick="play('${value[1]}')">
-        <span class="soundIcon">${value[0]}</span>
-        <span class="soundName">${key}</span>
-       </button>`;
-  }
-}
-/* =========================
-   INITIALIZATION
-   ========================= */
-let turnCommand = null;
-let driveComand = null;
-let lastRan;
-let lastFunc;
-let x;
-let y;
 let turnValues = [
 "140201FC00AD",
 "140201EA725A",
@@ -628,85 +513,306 @@ let turnValues = [
 "1402013548C8",
 "140201002E3E"
 ];
-let joystick1 =
-  new JoystickController("stick1", 64, 8);
+/* =========================
+   JOYSTICK
+   ========================= */
+class JoystickController {
+  constructor(stickID, maxDistance, deadzone) {
+    this.id = stickID;
+    let stick =
+      document.getElementById(stickID);
+    this.dragStart = null;
+    this.touchId = null;
+    this.active = false;
+    this.value = {
+      x: 0,
+      y: 0
+    };
+    let self = this;
+    function handleDown(event) {
+      self.active = true;
+      stick.style.transition = '0s';
+      event.preventDefault();
+      if (event.changedTouches)
+        self.dragStart = {
+          x: event.changedTouches[0].clientX,
+          y: event.changedTouches[0].clientY
+        };
+      else
+        self.dragStart = {
+          x: event.clientX,
+          y: event.clientY
+        };
+      if (event.changedTouches)
+        self.touchId =
+          event.changedTouches[0].identifier;
+    }
+    function handleMove(event) {
+      if (!self.active) return;
+      if (!characteristic) return;
+      let touchmoveId = null;
+      if (event.changedTouches) {
+        for (
+          let i = 0;
+          i < event.changedTouches.length;
+          i++
+        ) {
+          if (
+            self.touchId ==
+            event.changedTouches[i].identifier
+          ) {
+            touchmoveId = i;
+            event.clientX =
+              event.changedTouches[i].clientX;
+            event.clientY =
+              event.changedTouches[i].clientY;
+          }
+        }
+        if (touchmoveId == null) return;
+      }
+      const xDiff =
+        event.clientX -
+        self.dragStart.x;
+      const yDiff =
+        event.clientY -
+        self.dragStart.y;
+      const angle =
+        Math.atan2(yDiff, xDiff);
+      const driveangle =
+        Math.atan2(xDiff, -yDiff);
+      const distance =
+        Math.min(
+          maxDistance,
+          Math.hypot(xDiff, yDiff)
+        );
+      const xPosition =
+        distance * Math.cos(angle);
+      const yPosition =
+        distance * Math.sin(angle);
+      stick.style.transform =
+        `translate3d(${xPosition}px, ${yPosition}px, 0px)`;
+      const distance2 =
+        (distance < deadzone)
+        ? 0
+        : maxDistance /
+          (maxDistance - deadzone) *
+          (distance - deadzone);
+      const xPosition2 =
+        distance2 * Math.cos(angle);
+      const yPosition2 =
+        distance2 * Math.sin(angle);
+      const xPercent =
+        parseFloat(
+          (xPosition2 / maxDistance)
+          .toFixed(4)
+        );
+      const yPercent =
+        parseFloat(
+          (yPosition2 / maxDistance)
+          .toFixed(4)
+        );
+      self.value = {
+        x: xPercent,
+        y: yPercent
+      };
+      let xVal;
+      let yVal;
+      let limit =
+        .75 * Math.PI;
+      if (
+        Math.abs(driveangle) < limit
+      ) {
+        xVal =
+          ((33 - 2) *
+          (driveangle + limit)) /
+          (2 * limit) + 2;
+        yVal =
+          ((0 - 31) * distance) /
+          64 + 31;
+      }
+      else {
+        xVal = 17;
+        yVal =
+          ((62 - 31) * distance) /
+          64 + 31;
+      }
+      x = Math.floor(xVal);
+      y = Math.floor(yVal);
+      throttle(
+        () => driveAndTurn()
+      );
+    }
+    function handleUp(event) {
+      if (!self.active) return;
+      if (
+        event.changedTouches &&
+        self.touchId !=
+        event.changedTouches[0].identifier
+      )
+        return;
+      stick.style.transition = '.2s';
+      stick.style.transform =
+        `translate3d(0px, 0px, 0px)`;
+      self.value = {
+        x: 0,
+        y: 0
+      };
+      self.touchId = null;
+      self.active = false;
+      stop();
+    }
+    stick.addEventListener(
+      'mousedown',
+      handleDown
+    );
+    stick.addEventListener(
+      'touchstart',
+      handleDown
+    );
+    document.addEventListener(
+      'mousemove',
+      handleMove,
+      {passive: true}
+    );
+    document.addEventListener(
+      'touchmove',
+      handleMove,
+      {passive: true}
+    );
+    document.addEventListener(
+      'mouseup',
+      handleUp
+    );
+    document.addEventListener(
+      'touchend',
+      handleUp
+    );
+  }
+}
+/* =========================
+   DRIVE + TURN
+   ========================= */
+function driveAndTurn() {
+  if (x)
+    turn(x);
+  setTimeout(
+    () => drive(y),
+    100
+  );
+}
+/* =========================
+   THROTTLE
+   ========================= */
+let lastRan;
+let lastFunc;
 function throttle(func, limit = 150) {
   const context = this;
   const args = arguments;
   if (!lastRan) {
     func.apply(context, args);
     lastRan = Date.now();
-  } else {
+  }
+  else {
     clearTimeout(lastFunc);
     lastFunc =
-      setTimeout(function() {
-        if (
-          (Date.now() - lastRan) >= limit
-        ) {
-          func.apply(context, args);
-          lastRan = Date.now();
-        }
-      },
-      limit - (Date.now() - lastRan));
+      setTimeout(
+        function() {
+          if (
+            (Date.now() - lastRan)
+            >= limit
+          ) {
+            func.apply(
+              context,
+              args
+            );
+            lastRan =
+              Date.now();
+          }
+        },
+        limit -
+        (Date.now() - lastRan)
+      );
   }
 }
+/* =========================
+   SOUNDS
+   ========================= */
+let sounds = {
+  "grump":
+    ["😠", "1E011B42AA"],
+  "scold":
+    ["😤", "1E011A528B"],
+  "chitter":
+    ["🗯️", "1E011962E8"],
+  "chattering":
+    ["💬", "1E011872C9"],
+  "i love you":
+    ["❤️", "1E01178326"],
+  "bleep":
+    ["🔊", "1E01169307"],
+  "beep":
+    ["📢", "1E0115A364"],
+  "whistle":
+    ["🎵", "1E0114B345"],
+  "descending":
+    ["📉", "1E0113C3A2"],
+  "excited":
+    ["🤩", "1E0112D383"],
+  "cheery":
+    ["😊", "1E0111E3E0"],
+  "sad":
+    ["😢", "1E0110F3C1"],
+  "scream!!":
+    ["😱", "1E010F101F"],
+  "startup":
+    ["🚀", "1E010E003E"],
+  "surprise!!":
+    ["😲", "1E010C207C"],
+  "story":
+    ["📖", "1E010A40BA"],
+  "wow!":
+    ["✨", "1E010860F8"],
+  "thbt":
+    ["😛", "1E01068136"],
+  "worried":
+    ["😟", "1E0104A174"],
+  "thinking":
+    ["🤔", "1E0100E1F0"]
+};
+function makeSoundButtons() {
+  let soundsDiv =
+    document.getElementById(
+      'buttonsDiv'
+    );
+  for (
+    let [key, value]
+    of Object.entries(sounds)
+  ) {
+    soundsDiv.innerHTML +=
+      `<button
+        class="soundButton"
+        onclick="play('${value[1]}')">
+        <span class="soundIcon">
+          ${value[0]}
+        </span>
+        <span class="soundName">
+          ${key}
+        </span>
+      </button>`;
+  }
+}
+/* =========================
+   INITIALIZE AFTER HTML
+   ========================= */
+let x;
+let y;
+let joystick1 =
+  new JoystickController(
+    "stick1",
+    64,
+    8
+  );
 makeSoundButtons();
 </script>
-</head>
-<body>
-<div id="controls">
-  <div id="left">
-<div class="panelTitle">
-  R2-D2 // DRIVE CONTROL
-</div>
-<div id="connectionPanel">
-  <button id="connectButton"
-          onclick="connect()">
-    CONNECT
-  </button>
-  <div id="status">
-    ○ DISCONNECTED
-  </div>
-</div>
-<div id="joystickArea">
-  <div id="joystick">
-    <img
-      src="images/joystick-base.png"
-      height="256px"
-    >
-    <div id="stick1">
-      <img
-        src="images/joystick-red.png"
-        height="128px"
-      >
-    </div>
-  </div>
-  <div class="joystickLabel">
-    TOUCH TO DRIVE
-  </div>
-</div>
-<button
-  id="stopButton"
-  onclick="stop()">
-  ⛔ STOP
-</button>
-  </div>
-  <div id="right">
-<div class="soundHeader">
-  <div>
-    <div class="soundTitle">
-      🤖 R2-D2 SOUNDS
-    </div>
-    <div class="soundSubtitle">
-      ASTROMECH COMMUNICATION SYSTEM
-    </div>
-  </div>
-  <div style="font-size:25px;">
-    📡
-  </div>
-</div>
-<div id="buttonsDiv"></div>
-  </div>
-</div>
 </body>
 </html>
