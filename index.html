@@ -20,8 +20,7 @@
       height: 100%;
       overflow: hidden;
       font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
-      background:
-        radial-gradient(circle at center, #26313b 0%, #111820 70%);
+      background: radial-gradient(circle at center, #26313b 0%, #111820 70%);
       color: white;
     }
 
@@ -29,7 +28,6 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      touch-action: none;
     }
 
     #controls {
@@ -41,7 +39,10 @@
       gap: 20px;
     }
 
-    /* DRIVE PANEL */
+    /* =========================
+       DRIVE PANEL
+       ========================= */
+
     #left {
       flex: 1;
       min-width: 360px;
@@ -113,7 +114,10 @@
       color: #62e0ff;
     }
 
-    /* JOYSTICK */
+    /* =========================
+       JOYSTICK
+       ========================= */
+
     #joystickArea {
       position: absolute;
       left: 50%;
@@ -123,12 +127,14 @@
       height: 300px;
       border-radius: 50%;
       background:
-        radial-gradient(circle,
+        radial-gradient(
+          circle,
           #313b43 0%,
           #1b242b 55%,
           #10171c 56%,
           #252f36 68%,
-          #0c1216 70%);
+          #0c1216 70%
+        );
       box-shadow:
         inset 0 0 0 5px #59646a,
         inset 0 0 0 12px #161e23,
@@ -189,7 +195,10 @@
         0 4px 10px rgba(0,0,0,.35);
     }
 
-    /* SOUND PANEL */
+    /* =========================
+       SOUND PANEL
+       ========================= */
+
     #right {
       flex: 1.15;
       min-width: 390px;
@@ -314,17 +323,30 @@
     </div>
 
     <div id="joystickArea">
-      <div id="joystick">
-        <img src="images/joystick-base.png" height="256px">
 
-        <div id="stick1">
-          <img src="images/joystick-red.png" height="128px">
+      <div id="joystick">
+
+        <img
+          src="images/joystick-base.png"
+          height="256px"
+        >
+
+        <div
+          id="stick1"
+          style="position: absolute; left:64px; top:64px;"
+        >
+          <img
+            src="images/joystick-red.png"
+            height="128px"
+          >
         </div>
+
       </div>
 
       <div class="joystickLabel">
         TOUCH TO DRIVE
       </div>
+
     </div>
 
     <button id="stopButton" onclick="stop()">
@@ -333,10 +355,13 @@
 
   </div>
 
+
   <div id="right">
 
     <div class="soundHeader">
+
       <div>
+
         <div class="soundTitle">
           🤖 R2-D2 SOUNDS
         </div>
@@ -344,11 +369,13 @@
         <div class="soundSubtitle">
           ASTROMECH COMMUNICATION SYSTEM
         </div>
+
       </div>
 
       <div style="font-size:25px;">
         📡
       </div>
+
     </div>
 
     <div id="buttonsDiv"></div>
@@ -357,17 +384,19 @@
 
 </div>
 
+
 <script>
 
-/* =========================
+/* =========================================================
    BLUETOOTH
-   ========================= */
+   原版 interface06.html をそのまま使用
+   ========================================================= */
 
 var characteristic;
 
 function connect() {
 
-  navigator.bluetooth.requestDevice({
+  let response = navigator.bluetooth.requestDevice({
     filters: [{"name":"w32 ControlHub"}],
     optionalServices: [
       'd9d9e9e0-aa4e-4797-8151-cb41cedaf2ad'
@@ -375,20 +404,25 @@ function connect() {
   })
 
   .then(device => {
+
     return device.gatt.connect();
+
   })
 
   .then(server => {
+
     return server.getPrimaryService(
       'd9d9e9e0-aa4e-4797-8151-cb41cedaf2ad'
     );
+
   })
 
   .then(async service => {
 
-    characteristic = await service.getCharacteristic(
-      "d9d9e9e1-aa4e-4797-8151-cb41cedaf2ad"
-    );
+    characteristic =
+      await service.getCharacteristic(
+        "d9d9e9e1-aa4e-4797-8151-cb41cedaf2ad"
+      );
 
   })
 
@@ -417,9 +451,15 @@ function connect() {
 }
 
 
+/* =========================================================
+   WRITE
+   原版そのまま
+   ========================================================= */
+
 async function writeToChar(value) {
 
   value = hexToBytes(value);
+
   value = new Uint8Array(value).buffer;
 
   if (characteristic) {
@@ -434,11 +474,15 @@ async function writeToChar(value) {
 async function play(sound) {
 
   try {
+
     writeToChar(sound);
+
   }
 
   catch(error) {
+
     console.log('Argh! ' + error);
+
   }
 
 }
@@ -500,9 +544,10 @@ async function stop() {
 }
 
 
-/* =========================
+/* =========================================================
    UTILS
-   ========================= */
+   原版そのまま
+   ========================================================= */
 
 function hexToBytes(hex) {
 
@@ -521,135 +566,139 @@ function hexToBytes(hex) {
     );
 
   return bytes;
-
 }
 
 
-/* =========================
+/* =========================================================
    DRIVE VALUES
-   原版と完全一致
-   ========================= */
+   原版そのまま
+   ========================================================= */
 
 let driveValues = [
 
-"140202FF659D",
-"140202FA3538",
-"140202F6F4B4",
-"140202F2B430",
-"140202ED57EE",
-"140202EA2709",
-"140202E6E685",
-"140202E3B620",
-"140202DF41FF",
-"140202DA115A",
-"140202D6D0D6",
-"140202D29052",
-"140202CE43EF",
-"140202CA036B",
-"140202C5F284",
-"140202C28263",
-"140202BE3D78",
-"140202BA7DFC",
-"140202B6BC70",
-"140202B2FCF4",
-"140202AB7FEC",
-"140202AA6FCD",
-"140202A6AE41",
-"140202A2EEC5",
-"140202A1DEA6",
-"1402029E191A",
-"1402029969FD",
-"140202969812",
-"14020292D896",
-"1402028D3B48",
-"1402028A4BAF",
-"140202897BCC",
-"1402027DD457",
-"1402027994D3",
-"14020276653C",
-"1402027225B8",
-"1402026EF605",
-"1402026DC666",
-"1402026896C3",
-"1402026327A8",
-"1402026107EA",
-"1402025CE014",
-"14020259B0B1",
-"14020255713D",
-"140202502198",
-"1402024B82C2",
-"14020249A280",
-"14020245630C",
-"140202412388",
-"1402023BFC55",
-"14020239DC17",
-"140202337D5D",
-"140202304D3E",
-"1402022BEE64",
-"14020229CE26",
-"140202214F2E",
-"1402021BD837",
-"14020218E854",
-"1402021429D8",
-"1402020F8A82",
-"1402020CBAE1",
-"140202070B8A"
+  "140202FF659D",
+  "140202FA3538",
+  "140202F6F4B4",
+  "140202F2B430",
+  "140202ED57EE",
+  "140202EA2709",
+  "140202E6E685",
+  "140202E3B620",
+  "140202DF41FF",
+  "140202DA115A",
+  "140202D6D0D6",
+  "140202D29052",
+  "140202CE43EF",
+  "140202CA036B",
+  "140202C5F284",
+  "140202C28263",
+  "140202BE3D78",
+  "140202BA7DFC",
+  "140202B6BC70",
+  "140202B2FCF4",
+  "140202AB7FEC",
+  "140202AA6FCD",
+  "140202A6AE41",
+  "140202A2EEC5",
+  "140202A1DEA6",
+  "1402029E191A",
+  "1402029969FD",
+  "140202969812",
+  "14020292D896",
+  "1402028D3B48",
+  "1402028A4BAF",
+  "140202897BCC",
+  "1402027DD457",
+  "1402027994D3",
+  "14020276653C",
+  "1402027225B8",
+  "1402026EF605",
+  "1402026DC666",
+  "1402026896C3",
+  "1402026327A8",
+  "1402026107EA",
+  "1402025CE014",
+  "14020259B0B1",
+  "14020255713D",
+  "140202502198",
+  "1402024B82C2",
+  "14020249A280",
+  "14020245630C",
+  "140202412388",
+  "1402023BFC55",
+  "14020239DC17",
+  "140202337D5D",
+  "140202304D3E",
+  "1402022BEE64",
+  "14020229CE26",
+  "140202214F2E",
+  "140202205F0F",
+  "1402021BD837",
+  "14020218E854",
+  "1402021429D8",
+  "1402020F8A82",
+  "1402020CBAE1",
+  "140202070B8A"
 
 ];
 
 
-/* =========================
+/* =========================================================
    TURN VALUES
-   原版と完全一致
-   ========================= */
+   原版そのまま
+   ========================================================= */
 
 let turnValues = [
 
-"140201FC00AD",
-"140201EA725A",
-"140201E49394",
-"140201DF14AC",
-"140201D9746A",
-"140201D1F562",
-"140201CC36FE",
-"140201C697B4",
-"140201C0F772",
-"140201B918CC",
-"140201B4C961",
-"140201AE7A1A",
-"140201A7EB33",
-"140201A2BB96",
-"1402019C6C0B",
-"14020196CD41",
-"14020190AD87",
-"1402018A1EFC",
-"14020184FF32",
-"1402017EB167",
-"14020178D1A1",
-"1402017270EB",
-"1402016C8314",
-"14020166225E",
-"140201604298",
-"1402015AD581",
-"14020154344F",
-"1402014F9715",
-"14020149F7D3",
-"1402014246B8",
-"1402013CD9E1",
-"1402013548C8",
-"140201002E3E"
+  "140201FC00AD",
+  "140201EA725A",
+  "140201E49394",
+  "140201DF14AC",
+  "140201D9746A",
+  "140201D1F562",
+  "140201CC36FE",
+  "140201C697B4",
+  "140201C0F772",
+  "140201B918CC",
+  "140201B4C961",
+  "140201AE7A1A",
+  "140201A7EB33",
+  "140201A2BB96",
+  "1402019C6C0B",
+  "14020196CD41",
+  "14020190AD87",
+  "1402018A1EFC",
+  "14020184FF32",
+  "1402017EB167",
+  "14020178D1A1",
+  "1402017270EB",
+  "1402016C8314",
+  "14020166225E",
+  "140201604298",
+  "1402015AD581",
+  "14020154344F",
+  "1402014F9715",
+  "14020149F7D3",
+  "1402014246B8",
+  "1402013CD9E1",
+  "1402013548C8",
+  "140201002E3E"
 
 ];
 
 
-/* =========================
+/* =========================================================
    JOYSTICK
-   原版ロジックを維持
-   ========================= */
+   原版 interface06.html の制御ロジック
+   ========================================================= */
 
 class JoystickController {
 
-  constructor(stickID, maxDistance, deadzone) {
+  constructor(
+    stickID,
+    maxDistance,
+    deadzone
+  ) {
 
     this.id = stickID;
 
@@ -657,7 +706,9 @@ class JoystickController {
       document.getElementById(stickID);
 
     this.dragStart = null;
+
     this.touchId = null;
+
     this.active = false;
 
     this.value = {
@@ -756,15 +807,20 @@ class JoystickController {
       const distance =
         Math.min(
           maxDistance,
-          Math.hypot(xDiff, yDiff)
+          Math.hypot(
+            xDiff,
+            yDiff
+          )
         );
 
 
       const xPosition =
-        distance * Math.cos(angle);
+        distance *
+        Math.cos(angle);
 
       const yPosition =
-        distance * Math.sin(angle);
+        distance *
+        Math.sin(angle);
 
 
       stick.style.transform =
@@ -780,10 +836,12 @@ class JoystickController {
 
 
       const xPosition2 =
-        distance2 * Math.cos(angle);
+        distance2 *
+        Math.cos(angle);
 
       const yPosition2 =
-        distance2 * Math.sin(angle);
+        distance2 *
+        Math.sin(angle);
 
 
       const xPercent =
@@ -805,6 +863,11 @@ class JoystickController {
       };
 
 
+      /*
+       * ここが走行方向決定の核心。
+       * 原版から変更しない。
+       */
+
       let xVal;
       let yVal;
 
@@ -815,6 +878,10 @@ class JoystickController {
       if (
         Math.abs(driveangle) < limit
       ) {
+
+        /*
+         * FORWARD
+         */
 
         xVal =
           ((33 - 2) *
@@ -828,6 +895,15 @@ class JoystickController {
       }
 
       else {
+
+        /*
+         * REVERSE
+         *
+         * x = 17 固定
+         * y = 31 → 62
+         *
+         * ここは絶対に変更しない。
+         */
 
         xVal = 17;
 
@@ -918,9 +994,10 @@ class JoystickController {
 }
 
 
-/* =========================
+/* =========================================================
    DRIVE + TURN
-   ========================= */
+   原版そのまま
+   ========================================================= */
 
 function driveAndTurn() {
 
@@ -935,25 +1012,34 @@ function driveAndTurn() {
 }
 
 
-/* =========================
+/* =========================================================
    THROTTLE
-   ========================= */
+   原版そのまま
+   ========================================================= */
 
 let lastRan;
 let lastFunc;
 
 
-function throttle(func, limit = 150) {
+function throttle(
+  func,
+  limit = 150
+) {
 
   const context = this;
+
   const args = arguments;
 
 
   if (!lastRan) {
 
-    func.apply(context, args);
+    func.apply(
+      context,
+      args
+    );
 
-    lastRan = Date.now();
+    lastRan =
+      Date.now();
 
   }
 
@@ -990,9 +1076,10 @@ function throttle(func, limit = 150) {
 }
 
 
-/* =========================
+/* =========================================================
    SOUNDS
-   ========================= */
+   UIは現在版を維持
+   ========================================================= */
 
 let sounds = {
 
@@ -1092,12 +1179,13 @@ function makeSoundButtons() {
 }
 
 
-/* =========================
+/* =========================================================
    INITIALIZE
-   ========================= */
+   ========================================================= */
 
 let x;
 let y;
+
 
 let joystick1 =
   new JoystickController(
@@ -1105,6 +1193,7 @@ let joystick1 =
     64,
     8
   );
+
 
 makeSoundButtons();
 
